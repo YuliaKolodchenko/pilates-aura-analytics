@@ -1,0 +1,552 @@
+{
+  "meta": {
+    "generated_at": "2026-09-26T15:18:16+00:00",
+    "as_of": "2026-09-26",
+    "sources": {
+      "First Visit Report 01-02-2026 - 31-12-2026": "First Visit Report 01-02-2026 - 31-12-2026.xlsx",
+      "Last Visit Report 01-02-2026 - 31-12-2026": "Last Visit Report 01-02-2026 - 31-12-2026.xlsx",
+      "SalesByService Report 01-02-2026 - 31-12-2026": "SalesByService Report 01-02-2026 - 31-12-2026.xlsx",
+      "AttendanceAnalysis Report 01-02-2026 - 31-12-2026": "AttendanceAnalysis Report 01-02-2026 - 31-12-2026.xlsx"
+    },
+    "warnings": [
+      "Sales export is the SUMMARY layout (one row per product). Monthly revenue, new-vs-renewal and per-client value need the DETAIL layout — re-export with client detail enabled."
+    ],
+    "assumptions": {
+      "capacity_per_class": 10,
+      "classpass_payout_eur": 5.0,
+      "lapse_days": 60,
+      "cohort_min_obs_days": 60,
+      "min_cell": 10,
+      "slots_opened_late": [
+        "16:00",
+        "Saturday"
+      ]
+    }
+  },
+  "overview": {
+    "clients": 751,
+    "window_start": "2026-02-02",
+    "window_end": "2026-09-26",
+    "weeks": 33.7,
+    "lifetime_visits": 3724
+  },
+  "channels": [
+    {
+      "channel": "ClassPass",
+      "clients": 346,
+      "share": 46.1,
+      "return_rate": 19.4,
+      "conversion_rate": 1.7,
+      "converted": 6,
+      "mean_visits": 1.8,
+      "median_lifespan_days": 0.0
+    },
+    {
+      "channel": "Trial / free",
+      "clients": 370,
+      "share": 49.3,
+      "return_rate": 74.1,
+      "conversion_rate": 37.3,
+      "converted": 138,
+      "mean_visits": 6.8,
+      "median_lifespan_days": 14.0
+    },
+    {
+      "channel": "Paid direct",
+      "clients": 35,
+      "share": 4.7,
+      "return_rate": 94.3,
+      "conversion_rate": null,
+      "converted": null,
+      "mean_visits": 16.7,
+      "median_lifespan_days": 128.0
+    }
+  ],
+  "cohorts": [
+    {
+      "month": "2026-02",
+      "new": 189,
+      "classpass": 121,
+      "trial": 48,
+      "paid": 20,
+      "return_rate": 38.1,
+      "trial_return_rate": 79.2,
+      "classpass_return_rate": 11.6,
+      "complete": true
+    },
+    {
+      "month": "2026-03",
+      "new": 119,
+      "classpass": 68,
+      "trial": 43,
+      "paid": 8,
+      "return_rate": 51.3,
+      "trial_return_rate": 88.4,
+      "classpass_return_rate": 23.5,
+      "complete": true
+    },
+    {
+      "month": "2026-04",
+      "new": 67,
+      "classpass": 15,
+      "trial": 49,
+      "paid": 3,
+      "return_rate": 77.6,
+      "trial_return_rate": 89.8,
+      "classpass_return_rate": 33.3,
+      "complete": true
+    },
+    {
+      "month": "2026-05",
+      "new": 56,
+      "classpass": 4,
+      "trial": 50,
+      "paid": 2,
+      "return_rate": 69.6,
+      "trial_return_rate": 76.0,
+      "classpass_return_rate": null,
+      "complete": true
+    },
+    {
+      "month": "2026-06",
+      "new": 47,
+      "classpass": 14,
+      "trial": 33,
+      "paid": 0,
+      "return_rate": 59.6,
+      "trial_return_rate": 75.8,
+      "classpass_return_rate": 21.4,
+      "complete": true
+    },
+    {
+      "month": "2026-07",
+      "new": 91,
+      "classpass": 41,
+      "trial": 49,
+      "paid": 1,
+      "return_rate": 50.5,
+      "trial_return_rate": 67.3,
+      "classpass_return_rate": 29.3,
+      "complete": false
+    },
+    {
+      "month": "2026-08",
+      "new": 105,
+      "classpass": 63,
+      "trial": 41,
+      "paid": 1,
+      "return_rate": 41.9,
+      "trial_return_rate": 65.9,
+      "classpass_return_rate": 25.4,
+      "complete": false
+    },
+    {
+      "month": "2026-09",
+      "new": 77,
+      "classpass": 20,
+      "trial": 57,
+      "paid": 0,
+      "return_rate": 41.6,
+      "trial_return_rate": 54.4,
+      "classpass_return_rate": 5.0,
+      "complete": false
+    }
+  ],
+  "instructors": {
+    "raw": [
+      {
+        "instructor": "Snezana",
+        "first_visits": 10,
+        "return_rate": 70.0,
+        "classpass_share": 10.0
+      },
+      {
+        "instructor": "Victoria",
+        "first_visits": 257,
+        "return_rate": 55.3,
+        "classpass_share": 33.1
+      },
+      {
+        "instructor": "Paula",
+        "first_visits": 126,
+        "return_rate": 47.6,
+        "classpass_share": 46.8
+      },
+      {
+        "instructor": "Rodolfo",
+        "first_visits": 260,
+        "return_rate": 46.2,
+        "classpass_share": 60.0
+      },
+      {
+        "instructor": "Majo",
+        "first_visits": 98,
+        "return_rate": 45.9,
+        "classpass_share": 45.9
+      }
+    ],
+    "trial_only": [
+      {
+        "instructor": "Rodolfo",
+        "trial_clients": 88,
+        "return_rate": 92.0,
+        "conversion_rate": 51.1
+      },
+      {
+        "instructor": "Victoria",
+        "trial_clients": 155,
+        "return_rate": 71.0,
+        "conversion_rate": 37.4
+      },
+      {
+        "instructor": "Paula",
+        "trial_clients": 66,
+        "return_rate": 71.2,
+        "conversion_rate": 36.4
+      },
+      {
+        "instructor": "Majo",
+        "trial_clients": 52,
+        "return_rate": 57.7,
+        "conversion_rate": 11.5
+      }
+    ],
+    "suppressed_below": 10
+  },
+  "lapse": {
+    "threshold_days": 60,
+    "share_lapsed": 55.9,
+    "share_lapsed_45": 61.8,
+    "share_lapsed_90": 46.7,
+    "median_days_since_last_visit": 75,
+    "by_segment_now": [
+      {
+        "segment": "ClassPass",
+        "share_lapsed": 66.4
+      },
+      {
+        "segment": "Trial / free",
+        "share_lapsed": 59.0
+      },
+      {
+        "segment": "Paid direct",
+        "share_lapsed": 32.0
+      }
+    ]
+  },
+  "schedule": {
+    "layout": "time",
+    "capacity": 10,
+    "sessions_known": true,
+    "total_visits": 3728,
+    "fill_rate_overall": 30.0,
+    "empty_seats_per_week": 256,
+    "slots": [
+      {
+        "day": null,
+        "time": "07:30",
+        "band": "Morning",
+        "visits": 311,
+        "unique_clients": 56,
+        "sessions": 140,
+        "avg_per_session": 2.22,
+        "fill_rate": 22.2,
+        "visits_per_client": 5.55,
+        "new_slot": false
+      },
+      {
+        "day": null,
+        "time": "08:30",
+        "band": "Morning",
+        "visits": 274,
+        "unique_clients": 78,
+        "sessions": 134,
+        "avg_per_session": 2.04,
+        "fill_rate": 20.4,
+        "visits_per_client": 3.51,
+        "new_slot": false
+      },
+      {
+        "day": null,
+        "time": "09:00",
+        "band": "Morning",
+        "visits": 16,
+        "unique_clients": 10,
+        "sessions": 4,
+        "avg_per_session": 4.0,
+        "fill_rate": 40.0,
+        "visits_per_client": 1.6,
+        "new_slot": false
+      },
+      {
+        "day": null,
+        "time": "09:30",
+        "band": "Morning",
+        "visits": 386,
+        "unique_clients": 128,
+        "sessions": 153,
+        "avg_per_session": 2.52,
+        "fill_rate": 25.2,
+        "visits_per_client": 3.02,
+        "new_slot": false
+      },
+      {
+        "day": null,
+        "time": "10:00",
+        "band": "Morning",
+        "visits": 3,
+        "unique_clients": 3,
+        "sessions": 2,
+        "avg_per_session": 1.5,
+        "fill_rate": 15.0,
+        "visits_per_client": 1.0,
+        "new_slot": false
+      },
+      {
+        "day": null,
+        "time": "10:30",
+        "band": "Morning",
+        "visits": 439,
+        "unique_clients": 180,
+        "sessions": 148,
+        "avg_per_session": 2.97,
+        "fill_rate": 29.7,
+        "visits_per_client": 2.44,
+        "new_slot": false
+      },
+      {
+        "day": null,
+        "time": "11:00",
+        "band": "Morning",
+        "visits": 4,
+        "unique_clients": 4,
+        "sessions": 3,
+        "avg_per_session": 1.33,
+        "fill_rate": 13.3,
+        "visits_per_client": 1.0,
+        "new_slot": false
+      },
+      {
+        "day": null,
+        "time": "12:00",
+        "band": "Afternoon",
+        "visits": 10,
+        "unique_clients": 7,
+        "sessions": 4,
+        "avg_per_session": 2.5,
+        "fill_rate": 25.0,
+        "visits_per_client": 1.43,
+        "new_slot": false
+      },
+      {
+        "day": null,
+        "time": "16:00",
+        "band": "Afternoon",
+        "visits": 37,
+        "unique_clients": 23,
+        "sessions": 22,
+        "avg_per_session": 1.68,
+        "fill_rate": 16.8,
+        "visits_per_client": 1.61,
+        "new_slot": true
+      },
+      {
+        "day": null,
+        "time": "17:00",
+        "band": "Evening",
+        "visits": 384,
+        "unique_clients": 154,
+        "sessions": 148,
+        "avg_per_session": 2.59,
+        "fill_rate": 25.9,
+        "visits_per_client": 2.49,
+        "new_slot": false
+      },
+      {
+        "day": null,
+        "time": "18:00",
+        "band": "Evening",
+        "visits": 592,
+        "unique_clients": 192,
+        "sessions": 165,
+        "avg_per_session": 3.59,
+        "fill_rate": 35.9,
+        "visits_per_client": 3.08,
+        "new_slot": false
+      },
+      {
+        "day": null,
+        "time": "19:00",
+        "band": "Evening",
+        "visits": 714,
+        "unique_clients": 233,
+        "sessions": 165,
+        "avg_per_session": 4.33,
+        "fill_rate": 43.3,
+        "visits_per_client": 3.06,
+        "new_slot": false
+      },
+      {
+        "day": null,
+        "time": "20:00",
+        "band": "Evening",
+        "visits": 558,
+        "unique_clients": 206,
+        "sessions": 166,
+        "avg_per_session": 3.36,
+        "fill_rate": 33.6,
+        "visits_per_client": 2.71,
+        "new_slot": false
+      }
+    ],
+    "bands": [
+      {
+        "band": "Morning",
+        "slots": 7,
+        "visits": 1433,
+        "share": 38.4,
+        "avg_per_session": 2.45,
+        "fill_rate": 24.5
+      },
+      {
+        "band": "Afternoon",
+        "slots": 2,
+        "visits": 47,
+        "share": 1.3,
+        "avg_per_session": 1.81,
+        "fill_rate": 18.1
+      },
+      {
+        "band": "Evening",
+        "slots": 4,
+        "visits": 2248,
+        "share": 60.3,
+        "avg_per_session": 3.49,
+        "fill_rate": 34.9
+      }
+    ]
+  },
+  "sales": {
+    "layout": "summary",
+    "direct_revenue": 51283.0,
+    "families": [
+      {
+        "family": "Monthly plan",
+        "revenue": 39315.0,
+        "lines": 4,
+        "share": 76.7
+      },
+      {
+        "family": "Trial pack",
+        "revenue": 9136.0,
+        "lines": 4,
+        "share": 17.8
+      },
+      {
+        "family": "Enrollment fee",
+        "revenue": 1750.0,
+        "lines": 4,
+        "share": 3.4
+      },
+      {
+        "family": "Drop-in / pack",
+        "revenue": 1081.0,
+        "lines": 4,
+        "share": 2.1
+      },
+      {
+        "family": "Free class",
+        "revenue": 0.0,
+        "lines": 1,
+        "share": 0.0
+      }
+    ],
+    "products": [
+      {
+        "family": "Monthly plan",
+        "product": "4 clases /mes",
+        "revenue": 23409.0,
+        "lines": 1
+      },
+      {
+        "family": "Monthly plan",
+        "product": "8 clases / mes",
+        "revenue": 15026.0,
+        "lines": 1
+      },
+      {
+        "family": "Trial pack",
+        "product": "3 Clases de Prueba",
+        "revenue": 5790.0,
+        "lines": 1
+      },
+      {
+        "family": "Trial pack",
+        "product": "2 Clases de Prueba",
+        "revenue": 2525.0,
+        "lines": 2
+      },
+      {
+        "family": "Enrollment fee",
+        "product": "Membresía 4 Clases x Mes  Enrollment Fee",
+        "revenue": 1175.0,
+        "lines": 1
+      },
+      {
+        "family": "Trial pack",
+        "product": "1 Clase de Prueba",
+        "revenue": 822.0,
+        "lines": 1
+      },
+      {
+        "family": "Monthly plan",
+        "product": "12 clases/ mes",
+        "revenue": 680.0,
+        "lines": 1
+      },
+      {
+        "family": "Enrollment fee",
+        "product": "Membresía 8 Clases x Mes  Enrollment Fee",
+        "revenue": 575.0,
+        "lines": 2
+      },
+      {
+        "family": "Drop-in / pack",
+        "product": "3 Clases",
+        "revenue": 531.0,
+        "lines": 2
+      },
+      {
+        "family": "Drop-in / pack",
+        "product": "1 Clase",
+        "revenue": 280.0,
+        "lines": 1
+      },
+      {
+        "family": "Drop-in / pack",
+        "product": "Clase adicional (Pase con membresía)",
+        "revenue": 270.0,
+        "lines": 1
+      },
+      {
+        "family": "Monthly plan",
+        "product": "10 Clases por trimestre",
+        "revenue": 200.0,
+        "lines": 1
+      }
+    ],
+    "monthly": null,
+    "renewal": null
+  },
+  "classpass": {
+    "payout_per_visit": 5.0,
+    "visits": 626,
+    "share_of_visits": 16.8,
+    "revenue": 3130.0,
+    "share_of_combined_revenue": 5.8,
+    "direct_revenue_per_visit": 16.55,
+    "value_per_client": {
+      "classpass": 9.0
+    }
+  }
+}

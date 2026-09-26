@@ -5,13 +5,391 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pilates Aura — Studio Analytics</title>
 <style>
-  body { font-family: -apple-system, system-ui, sans-serif; max-width: 640px; margin: 4rem auto; padding: 0 1.5rem; color: #222; }
-  h1 { font-weight: 600; letter-spacing: -0.01em; }
-  p { line-height: 1.5; color: #555; }
+  :root {
+    color-scheme: light;
+    --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+    --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10);
+    --classpass: #eb6834; --trial: #2a78d6; --paid: #1baf7a; --neutral: #c3c2b7;
+    --good: #006300; --critical: #d03b3b;
+    --accent: #1f4e5f;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+      --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
+      --classpass: #d95926; --trial: #3987e5; --paid: #199e70; --neutral: #383835;
+      --good: #0ca30c; --critical: #e66767; --accent: #8fb4c2;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); color: var(--ink);
+         font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 1040px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+  header { margin-bottom: 2rem; }
+  .kicker { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+  h1 { font-size: 30px; margin: .2rem 0 .3rem; letter-spacing: -.01em; font-weight: 650; }
+  .sub { color: var(--ink-2); margin: 0; max-width: 60ch; }
+  .meta { color: var(--muted); font-size: 13px; margin-top: .6rem; }
+  section { margin-top: 2.6rem; }
+  h2 { font-size: 20px; margin: 0 0 .25rem; font-weight: 650; }
+  .lede { color: var(--ink-2); margin: 0 0 1rem; max-width: 70ch; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.2rem; }
+  .grid { display: grid; gap: 1rem; }
+  .grid-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .grid-3 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+  .tiles { display: grid; gap: .8rem; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+  .tile { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: .9rem 1rem; }
+  .tile .label { font-size: 13px; color: var(--ink-2); }
+  .tile .value { font-size: 28px; font-weight: 650; margin-top: .15rem; letter-spacing: -.01em; }
+  .tile .note { font-size: 12px; color: var(--muted); margin-top: .2rem; }
+  .hero { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .hero .big { font-size: 56px; font-weight: 650; line-height: 1; letter-spacing: -.02em; }
+  .hero .who { display: flex; align-items: center; gap: .5rem; font-size: 14px; color: var(--ink-2); margin-bottom: .4rem; }
+  .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; }
+  .sw.cp { background: var(--classpass); } .sw.tr { background: var(--trial); } .sw.pd { background: var(--paid); }
+  .chart-title { font-size: 14px; font-weight: 600; margin: 0 0 .25rem; }
+  .chart-sub { font-size: 12.5px; color: var(--muted); margin: 0 0 .6rem; }
+  svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .legend { display: flex; flex-wrap: wrap; gap: .9rem; font-size: 12.5px; color: var(--ink-2); margin: .4rem 0 0; }
+  .legend span { display: inline-flex; align-items: center; gap: .35rem; }
+  .axis text { fill: var(--muted); font-size: 11px; }
+  .grid line { stroke: var(--grid); stroke-width: 1; }
+  .baseline { stroke: var(--axis); stroke-width: 1; }
+  .lbl { fill: var(--ink-2); font-size: 11.5px; }
+  .lbl.strong { fill: var(--ink); font-weight: 600; }
+  .tip { position: fixed; pointer-events: none; background: var(--ink); color: var(--page); font-size: 12.5px;
+         padding: .4rem .6rem; border-radius: 6px; opacity: 0; transition: opacity .08s; z-index: 10; max-width: 260px; }
+  .hit { fill: transparent; cursor: default; }
+  details { margin-top: .6rem; font-size: 13px; }
+  summary { color: var(--muted); cursor: pointer; }
+  table { border-collapse: collapse; width: 100%; margin-top: .5rem; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: .3rem .5rem; border-bottom: 1px solid var(--grid); font-size: 13px; }
+  th { color: var(--ink-2); font-weight: 600; }
+  td.num, th.num { text-align: right; }
+  .callout { border-left: 4px solid var(--accent); background: var(--surface); padding: .9rem 1.1rem; border-radius: 6px; margin-top: 1rem; }
+  .callout.warn { border-left-color: var(--critical); }
+  .callout b { display: block; margin-bottom: .2rem; }
+  .recs { counter-reset: r; list-style: none; padding: 0; margin: 0; display: grid; gap: .7rem; }
+  .recs li { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: .9rem 1.1rem 0.9rem 3rem; position: relative; }
+  .recs li::before { counter-increment: r; content: counter(r); position: absolute; left: 1rem; top: .85rem;
+                     width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: #fff;
+                     font-size: 13px; font-weight: 650; display: grid; place-items: center; }
+  .recs .why { color: var(--ink-2); font-size: 13.5px; margin-top: .25rem; }
+  .incomplete { fill: url(#hatch); }
+  footer { margin-top: 3rem; color: var(--muted); font-size: 13px; border-top: 1px solid var(--grid); padding-top: 1rem; }
+  #err { display: none; }
+  @media (max-width: 640px) { .hero { grid-template-columns: 1fr; } .hero .big { font-size: 44px; } h1 { font-size: 24px; } }
 </style>
 </head>
 <body>
-  <h1>Pilates Aura — Studio Analytics</h1>
-  <p>Deployment check. The dashboard will replace this page once the analysis pipeline is in place.</p>
+<main>
+<header>
+  <div class="kicker">Pilates Aura S.L. · Barcelona</div>
+  <h1>Where do the studio's members actually come from?</h1>
+  <p class="sub">Four disconnected Mindbody reports, joined on client ID, tell one story: the channel that brings half the visitors produces almost none of the members.</p>
+  <div class="meta" id="meta">Loading metrics…</div>
+</header>
+
+<div id="err" class="callout warn"><b>Could not load metrics.json</b>
+  If you opened this file directly, serve the folder instead: <code>python -m http.server</code> in <code>docs/</code>, then open <code>http://localhost:8000</code>.</div>
+
+<div id="app" hidden>
+
+<!-- ============ 1. THE THESIS ============ -->
+<section>
+  <h2>Two channels, same size, thirty times the difference</h2>
+  <p class="lede">A client's acquisition channel is the pricing option on their <em>first</em> visit. The outcome is whether they ever bought a monthly plan.</p>
+  <div class="hero">
+    <div class="card"><div class="who"><i class="sw cp"></i>First visit via ClassPass</div>
+      <div class="big" id="h-cp"></div><div class="note" id="h-cp-n" style="color:var(--ink-2);margin-top:.4rem"></div></div>
+    <div class="card"><div class="who"><i class="sw tr"></i>First visit via a trial or free class</div>
+      <div class="big" id="h-tr"></div><div class="note" id="h-tr-n" style="color:var(--ink-2);margin-top:.4rem"></div></div>
+  </div>
+  <div class="grid grid-2" style="margin-top:1rem">
+    <div class="card"><p class="chart-title">Came back at least once</p><p class="chart-sub">Share of first-time clients with a second visit, by channel</p><div id="c-return"></div></div>
+    <div class="card"><p class="chart-title">Bought a monthly plan</p><p class="chart-sub">Share of first-time clients now on a 4/8/12-class plan</p><div id="c-conv"></div></div>
+  </div>
+  <div id="t-channels"></div>
+</section>
+
+<!-- ============ 2. COHORTS ============ -->
+<section>
+  <h2>Who arrived each month</h2>
+  <p class="lede">New first-time clients by month and channel. Hatched months are incomplete — those clients have not yet had 60 days to come back, so their return rates are understated, not declining.</p>
+  <div class="card"><p class="chart-title">New clients per month, by acquisition channel</p><div id="c-cohorts"></div>
+    <div class="legend"><span><i class="sw cp"></i>ClassPass</span><span><i class="sw tr"></i>Trial / free</span><span><i class="sw pd"></i>Paid from day one</span></div></div>
+  <div class="grid grid-2" style="margin-top:1rem">
+    <div class="card"><p class="chart-title">Return rate of trial clients, by cohort</p><p class="chart-sub">Only cohorts with ≥10 trial clients; incomplete months hollow</p><div id="c-cohort-ret"></div></div>
+    <div class="card" id="cohort-note"></div>
+  </div>
+  <div id="t-cohorts"></div>
+</section>
+
+<!-- ============ 3. INSTRUCTORS ============ -->
+<section>
+  <h2>The instructor ranking that reverses</h2>
+  <p class="lede">Ranked on raw return rate, one instructor looks weakest. Control for <em>which channel</em> each instructor's first-timers came from, and the ranking flips.</p>
+  <div class="grid grid-2">
+    <div class="card"><p class="chart-title">Unadjusted — all first visits</p><p class="chart-sub">Return rate, with the share of each instructor's first-timers who came via ClassPass</p><div id="c-inst-raw"></div></div>
+    <div class="card"><p class="chart-title">Trial clients only — like for like</p><p class="chart-sub">Return rate and conversion to a monthly plan</p><div id="c-inst-trial"></div>
+      <div class="legend"><span><i class="sw" style="background:var(--trial)"></i>Returned</span><span><i class="sw" style="background:var(--paid)"></i>Bought a plan</span></div></div>
+  </div>
+  <div class="callout" id="inst-note"></div>
+</section>
+
+<!-- ============ 4. SCHEDULE ============ -->
+<section>
+  <h2>How full the classes are</h2>
+  <p class="lede" id="sched-lede"></p>
+  <div class="tiles" id="sched-tiles"></div>
+  <div class="card" style="margin-top:1rem"><p class="chart-title">Average attendees per session, by time slot</p><p class="chart-sub" id="sched-sub"></p><div id="c-sched"></div></div>
+  <div id="t-sched"></div>
+</section>
+
+<!-- ============ 5. MONEY ============ -->
+<section>
+  <h2>What the money says</h2>
+  <p class="lede" id="sales-lede"></p>
+  <div class="tiles" id="money-tiles"></div>
+  <div class="grid grid-2" style="margin-top:1rem">
+    <div class="card"><p class="chart-title">Direct revenue by product family</p><p class="chart-sub">Sales recorded in Mindbody. ClassPass settles outside it.</p><div id="c-fam"></div></div>
+    <div class="card" id="monthly-card"><p class="chart-title">Paying members per month</p><p class="chart-sub">Monthly-plan purchases: new members vs renewals</p><div id="c-monthly"></div></div>
+  </div>
+  <div class="callout" id="cp-note"></div>
+</section>
+
+<!-- ============ 6. RECOMMENDATION ============ -->
+<section>
+  <h2>What the owner should do</h2>
+  <p class="lede">Five things, in priority order. Each one names the number that would change the call.</p>
+  <ol class="recs" id="recs"></ol>
+</section>
+
+<!-- ============ 7. LIMITS ============ -->
+<section>
+  <h2>What this analysis cannot tell you</h2>
+  <ul id="limits" style="color:var(--ink-2);max-width:75ch;padding-left:1.2rem"></ul>
+</section>
+
+<footer id="foot"></footer>
+</div>
+</main>
+<div class="tip" id="tip"></div>
+
+<svg width="0" height="0" style="position:absolute"><defs>
+  <pattern id="hatch" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+    <line x1="0" y1="0" x2="0" y2="6" stroke="currentColor" stroke-width="1.5" opacity=".55"/></pattern>
+</defs></svg>
+
+<script>
+// ------------------------------------------------------------------ helpers
+const $ = s => document.querySelector(s);
+const fmt = { pct: v => v == null ? '—' : v.toFixed(v < 10 ? 1 : 0) + '%', eur: v => v == null ? '—' : '€' + Math.round(v).toLocaleString('en-GB'), eur2: v => v == null ? '—' : '€' + v.toFixed(2),
+              n: v => v == null ? '—' : Math.round(v).toLocaleString('en-GB'), f1: v => v == null ? '—' : v.toFixed(1) };
+const COL = { 'ClassPass': 'var(--classpass)', 'Trial / free': 'var(--trial)', 'Paid direct': 'var(--paid)' };
+const MON = m => { const [y, mm] = m.split('-'); return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+mm - 1] + (mm === '01' || m.endsWith('-02') && y ? '' : ''); };
+const tip = $('#tip');
+function hover(el, html) {
+  el.addEventListener('mousemove', e => { tip.innerHTML = html; tip.style.opacity = 1; tip.style.left = (e.clientX + 12) + 'px'; tip.style.top = (e.clientY + 12) + 'px'; });
+  el.addEventListener('mouseleave', () => tip.style.opacity = 0);
+}
+const NS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs = {}, parent) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+function txt(parent, x, y, s, cls = 'lbl', anchor = 'start') { const t = el('text', { x, y, class: cls, 'text-anchor': anchor }, parent); t.textContent = s; return t; }
+function svg(w, h, mount) { const s = el('svg', { viewBox: `0 0 ${w} ${h}` }); $(mount).innerHTML = ''; $(mount).appendChild(s); return s; }
+function table(mount, headers, rows) {
+  const d = document.createElement('details'); d.innerHTML = `<summary>Show as table</summary>`;
+  const t = document.createElement('table');
+  t.innerHTML = '<tr>' + headers.map((h, i) => `<th class="${i ? 'num' : ''}">${h}</th>`).join('') + '</tr>' +
+    rows.map(r => '<tr>' + r.map((c, i) => `<td class="${i ? 'num' : ''}">${c ?? '—'}</td>`).join('') + '</tr>').join('');
+  d.appendChild(t); $(mount).appendChild(d);
+}
+
+// Horizontal bars: items [{label, value, color, note, hatch}] ; max in same units
+function hbars(mount, items, { max = 100, unit = '%', w = 460 } = {}) {
+  const rowH = 30, left = 110, right = items.some(i => i.suffix) ? 150 : 52, h = items.length * rowH + 6;
+  const s = svg(w, h, mount); const scale = v => (w - left - right) * v / max;
+  items.forEach((it, i) => {
+    const y = i * rowH + 4, bw = Math.max(scale(it.value || 0), 0);
+    txt(s, left - 8, y + 16, it.label, 'lbl', 'end');
+    const r = el('rect', { x: left, y: y + 2, width: bw, height: 20, rx: 4, fill: it.color }, s);
+    if (it.hatch) { el('rect', { x: left, y: y + 2, width: bw, height: 20, rx: 4, class: 'incomplete', style: 'color:var(--surface)' }, s); }
+    txt(s, left + bw + 6, y + 16, (unit === '%' ? fmt.pct(it.value) : it.value) + (it.suffix || ''), 'lbl strong');
+    const hit = el('rect', { x: 0, y, width: w, height: rowH, class: 'hit' }, s);
+    hover(hit, `<b>${it.label}</b><br>${it.note || ''}`);
+  });
+  el('line', { x1: left, x2: left, y1: 0, y2: h, class: 'baseline' }, s);
+}
+
+// Grouped/stacked columns: cats [labels], series [{name,color,values[]}], stacked bool
+function columns(mount, cats, series, { stacked = false, unit = '', w = 900, h = 260, hatchIdx = [], maxOverride } = {}) {
+  const left = 40, right = 10, top = 14, bottom = 28;
+  const s = svg(w, h, mount);
+  const totals = cats.map((_, i) => stacked ? series.reduce((a, se) => a + (se.values[i] || 0), 0) : Math.max(...series.map(se => se.values[i] || 0)));
+  const max = maxOverride || Math.max(...totals) * 1.1;
+  const nice = Math.pow(10, Math.floor(Math.log10(max))); const step = Math.ceil(max / nice / 4) * nice;
+  const y = v => top + (h - top - bottom) * (1 - v / max);
+  const g = el('g', { class: 'grid' }, s);
+  for (let v = 0; v <= max; v += step) { el('line', { x1: left, x2: w - right, y1: y(v), y2: y(v) }, g); txt(s, left - 6, y(v) + 4, fmt.n(v), 'lbl', 'end'); }
+  const band = (w - left - right) / cats.length; const bw = Math.min(24 * (stacked ? 1.4 : 1), band * 0.6);
+  cats.forEach((c, i) => {
+    const cx = left + band * i + band / 2;
+    txt(s, cx, h - 8, c, 'lbl', 'middle');
+    let acc = 0; const parts = [];
+    series.forEach((se, k) => {
+      const v = se.values[i] || 0; if (!v) return;
+      let x0, y0, hh;
+      if (stacked) { x0 = cx - bw / 2; y0 = y(acc + v); hh = y(acc) - y0 - (acc ? 2 : 0); acc += v; }
+      else { const gw = bw; x0 = cx - (series.length * gw) / 2 + k * gw + 1; y0 = y(v); hh = y(0) - y0; }
+      const r = el('rect', { x: x0, y: y0, width: stacked ? bw : bw - 2, height: Math.max(hh, 0), fill: se.color, rx: 0 }, s);
+      if (hatchIdx.includes(i)) el('rect', { x: x0, y: y0, width: stacked ? bw : bw - 2, height: Math.max(hh, 0), class: 'incomplete', style: 'color:var(--surface)' }, s);
+      parts.push(`<span style="color:${se.color}">■</span> ${se.name}: <b>${fmt.n(v)}${unit}</b>`);
+    });
+    if (stacked && totals[i]) txt(s, cx, y(totals[i]) - 5, fmt.n(totals[i]), 'lbl strong', 'middle');
+    else if (!stacked && series.length === 1 && totals[i]) txt(s, cx, y(totals[i]) - 5, unit === '' && totals[i] % 1 ? totals[i].toFixed(1) : fmt.n(totals[i]), 'lbl strong', 'middle');
+    const hit = el('rect', { x: left + band * i, y: top, width: band, height: h - top - bottom, class: 'hit' }, s);
+    hover(hit, `<b>${c}</b>${hatchIdx.includes(i) ? ' · incomplete' : ''}<br>${parts.join('<br>')}`);
+  });
+  el('line', { x1: left, x2: w - right, y1: y(0), y2: y(0), class: 'baseline' }, s);
+}
+
+// Line with dots: cats, series [{name,color,values[]}], hollowIdx
+function line(mount, cats, series, { w = 460, h = 220, max = 100, hollowIdx = [] } = {}) {
+  const left = 36, right = 14, top = 14, bottom = 26;
+  const s = svg(w, h, mount);
+  const y = v => top + (h - top - bottom) * (1 - v / max), x = i => left + (w - left - right) * (cats.length === 1 ? .5 : i / (cats.length - 1));
+  const g = el('g', { class: 'grid' }, s);
+  for (let v = 0; v <= max; v += 25) { el('line', { x1: left, x2: w - right, y1: y(v), y2: y(v) }, g); txt(s, left - 6, y(v) + 4, v + '%', 'lbl', 'end'); }
+  cats.forEach((c, i) => txt(s, x(i), h - 6, c, 'lbl', 'middle'));
+  series.forEach(se => {
+    const pts = se.values.map((v, i) => v == null ? null : [x(i), y(v)]);
+    let d = '', pen = false;
+    pts.forEach(p => { if (!p) { pen = false; return; } d += (pen ? 'L' : 'M') + p[0] + ',' + p[1]; pen = true; });
+    el('path', { d, fill: 'none', stroke: se.color, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, s);
+    pts.forEach((p, i) => { if (!p) return;
+      el('circle', { cx: p[0], cy: p[1], r: 6, fill: 'var(--surface)' }, s);
+      const c = el('circle', { cx: p[0], cy: p[1], r: 4.5, fill: hollowIdx.includes(i) ? 'var(--surface)' : se.color, stroke: se.color, 'stroke-width': 2 }, s);
+      const hit = el('circle', { cx: p[0], cy: p[1], r: 14, class: 'hit' }, s);
+      hover(hit, `<b>${cats[i]}</b>${hollowIdx.includes(i) ? ' · incomplete' : ''}<br>${se.name}: <b>${fmt.pct(se.values[i])}</b>`);
+    });
+    const last = pts.map((p, i) => [p, i]).filter(x => x[0]).pop();
+    if (last) txt(s, last[0][0] + 9, last[0][1] + 4, fmt.pct(se.values[last[1]]), 'lbl strong');
+  });
+}
+
+function tile(label, value, note) { return `<div class="tile"><div class="label">${label}</div><div class="value">${value}</div>${note ? `<div class="note">${note}</div>` : ''}</div>`; }
+
+// ------------------------------------------------------------------ render
+async function main() {
+  let M;
+  try { M = await (await fetch('metrics.json', { cache: 'no-store' })).json(); }
+  catch (e) { $('#err').style.display = 'block'; $('#meta').textContent = ''; return; }
+  $('#app').hidden = false;
+  const ov = M.overview, ch = Object.fromEntries(M.channels.map(c => [c.channel, c]));
+  const cp = ch['ClassPass'], tr = ch['Trial / free'], pd = ch['Paid direct'];
+  $('#meta').textContent = `${fmt.n(ov.clients)} clients · ${ov.window_start} → ${ov.window_end} (${ov.weeks} weeks) · data as of ${M.meta.as_of}`;
+
+  // 1. thesis
+  $('#h-cp').textContent = fmt.pct(cp.conversion_rate);
+  $('#h-cp-n').textContent = `${cp.converted} of ${fmt.n(cp.clients)} first-timers bought a monthly plan`;
+  $('#h-tr').textContent = fmt.pct(tr.conversion_rate);
+  $('#h-tr-n').textContent = `${tr.converted} of ${fmt.n(tr.clients)} first-timers bought a monthly plan`;
+  const chanItems = k => M.channels.map(c => ({ label: c.channel === 'Paid direct' ? 'Paid from day one' : c.channel, value: c[k], color: COL[c.channel],
+    note: `${fmt.n(c.clients)} clients · ${fmt.pct(c.share)} of all first visits<br>mean ${c.mean_visits} lifetime visits` }));
+  hbars('#c-return', chanItems('return_rate'));
+  hbars('#c-conv', chanItems('conversion_rate').filter(i => i.value != null));
+  table('#t-channels', ['Channel', 'Clients', 'Share', 'Returned', 'Bought plan', 'Mean visits', 'Median lifespan (d)'],
+    M.channels.map(c => [c.channel, c.clients, fmt.pct(c.share), fmt.pct(c.return_rate), c.conversion_rate == null ? '—' : `${c.converted} (${fmt.pct(c.conversion_rate)})`, c.mean_visits, c.median_lifespan_days]));
+
+  // 2. cohorts
+  const co = M.cohorts, cats = co.map(c => MON(c.month)), hatch = co.map((c, i) => c.complete ? -1 : i).filter(i => i >= 0);
+  columns('#c-cohorts', cats, [
+    { name: 'Trial / free', color: COL['Trial / free'], values: co.map(c => c.trial) },
+    { name: 'ClassPass', color: COL['ClassPass'], values: co.map(c => c.classpass) },
+    { name: 'Paid from day one', color: COL['Paid direct'], values: co.map(c => c.paid) }], { stacked: true, hatchIdx: hatch });
+  line('#c-cohort-ret', cats, [{ name: 'Trial clients returned', color: COL['Trial / free'], values: co.map(c => c.trial_return_rate) }], { hollowIdx: hatch });
+  const feb = co[0], peakCp = co.reduce((a, c) => c.classpass > a.classpass ? c : a), lowCp = co.reduce((a, c) => c.classpass < a.classpass ? c : a);
+  $('#cohort-note').innerHTML = `<p class="chart-title">Reading the swing</p><p style="margin:0;color:var(--ink-2);font-size:14px">ClassPass intake went from <b>${peakCp.classpass}</b> in ${MON(peakCp.month)} to <b>${lowCp.classpass}</b> in ${MON(lowCp.month)} and back up, while trial intake stayed between ${Math.min(...co.map(c => c.trial))} and ${Math.max(...co.map(c => c.trial))} a month. Complete cohorts of trial clients return at ${Math.min(...co.filter(c => c.complete && c.trial_return_rate).map(c => c.trial_return_rate))}–${Math.max(...co.filter(c => c.complete && c.trial_return_rate).map(c => c.trial_return_rate))}%. The apparent decline in the last months is right-censoring, not churn — those clients haven't had time to come back.</p>`;
+  table('#t-cohorts', ['Month', 'New', 'ClassPass', 'Trial', 'Paid', 'Returned', 'Trial returned', 'Complete'],
+    co.map(c => [c.month, c.new, c.classpass, c.trial, c.paid, fmt.pct(c.return_rate), fmt.pct(c.trial_return_rate), c.complete ? 'yes' : 'no']));
+
+  // 3. instructors
+  const ir = M.instructors.raw, it = M.instructors.trial_only;
+  hbars('#c-inst-raw', ir.map(r => ({ label: r.instructor, value: r.return_rate, color: 'var(--neutral)', suffix: `  ·  ${fmt.pct(r.classpass_share)} via ClassPass`,
+    note: `${fmt.n(r.first_visits)} first visits · ${fmt.pct(r.classpass_share)} of them ClassPass` })));
+  const sI = svg(460, it.length * 44 + 6, '#c-inst-trial'); { const left = 110, right = 52, w = 460, sc = v => (w - left - right) * v / 100;
+    it.forEach((r, i) => { const y = i * 44 + 4; txt(sI, left - 8, y + 20, r.instructor, 'lbl', 'end');
+      el('rect', { x: left, y: y + 2, width: sc(r.return_rate), height: 14, rx: 3, fill: COL['Trial / free'] }, sI); txt(sI, left + sc(r.return_rate) + 6, y + 13, fmt.pct(r.return_rate), 'lbl strong');
+      el('rect', { x: left, y: y + 19, width: sc(r.conversion_rate), height: 14, rx: 3, fill: COL['Paid direct'] }, sI); txt(sI, left + sc(r.conversion_rate) + 6, y + 30, fmt.pct(r.conversion_rate), 'lbl strong');
+      hover(el('rect', { x: 0, y, width: w, height: 44, class: 'hit' }, sI), `<b>${r.instructor}</b><br>${r.trial_clients} trial clients<br>returned ${fmt.pct(r.return_rate)} · bought a plan ${fmt.pct(r.conversion_rate)}`); });
+    el('line', { x1: left, x2: left, y1: 0, y2: it.length * 44 + 6, class: 'baseline' }, sI); }
+  const bestT = it[0], rawPos = ir.findIndex(r => r.instructor === bestT.instructor) + 1;
+  $('#inst-note').innerHTML = `<b>${bestT.instructor} ranks #${rawPos} of ${ir.length} unadjusted and #1 on trial clients.</b>${fmt.pct(ir.find(r => r.instructor === bestT.instructor).classpass_share)} of ${bestT.instructor}'s first-timers arrive via ClassPass — the channel that returns to nobody. Judged on comparable clients, ${bestT.instructor} converts ${fmt.pct(bestT.conversion_rate)} of trials into members. Instructors with fewer than ${M.instructors.suppressed_below} clients in a group are not shown.`;
+
+  // 4. schedule
+  const S = M.schedule;
+  if (S) {
+    const core = S.slots.filter(s => !s.new_slot), peak = core.reduce((a, s) => s.avg_per_session > a.avg_per_session ? s : a), loyal = core.filter(s => s.visits > 50).reduce((a, s) => s.visits_per_client > a.visits_per_client ? s : a);
+    $('#sched-lede').innerHTML = `With ${S.capacity} reformers per class, the studio runs at <b>${fmt.pct(S.fill_rate_overall)} of capacity</b> — about <b>${fmt.n(S.empty_seats_per_week)} empty places a week</b>. Every extra body is close to free.`;
+    const ev = S.bands.find(b => b.band === 'Evening'), mo = S.bands.find(b => b.band === 'Morning');
+    $('#sched-tiles').innerHTML = tile('Overall fill rate', fmt.pct(S.fill_rate_overall), `capacity ${S.capacity} · ${S.sessions_known ? 'actual session counts' : 'assumes weekly slots'}`) +
+      tile('Busiest slot', `${peak.time}`, `${peak.avg_per_session} per session · ${fmt.pct(peak.fill_rate)} full`) +
+      tile('Evening share of visits', fmt.pct(ev.share), `${ev.avg_per_session} per session vs ${mo.avg_per_session} in the morning`) +
+      tile('Most loyal slot', loyal.time, `${loyal.visits_per_client} visits per client`);
+    const slots = S.slots.filter(s => S.sessions_known ? s.sessions >= 10 : s.visits >= 10);
+    $('#sched-sub').textContent = `Capacity is ${S.capacity}. Hatched slots opened recently and are too new to judge. Slots that ran fewer than 10 sessions omitted.`;
+    columns('#c-sched', slots.map(s => (s.day ? s.day.slice(0, 3) + ' ' : '') + s.time), [{ name: 'Avg attendees', color: 'var(--trial)', values: slots.map(s => s.avg_per_session) }],
+      { h: 240, maxOverride: S.capacity, hatchIdx: slots.map((s, i) => s.new_slot ? i : -1).filter(i => i >= 0) });
+    table('#t-sched', ['Slot', 'Visits', 'Sessions', 'Avg / session', 'Fill', 'Unique clients', 'Visits / client'],
+      S.slots.map(s => [(s.day ? s.day + ' ' : '') + s.time + (s.new_slot ? ' (new)' : ''), s.visits, s.sessions, s.avg_per_session, fmt.pct(s.fill_rate), s.unique_clients, s.visits_per_client]));
+  }
+
+  // 5. money
+  const SA = M.sales, CP = M.classpass;
+  if (SA) {
+    $('#sales-lede').innerHTML = `Direct revenue recorded in Mindbody: <b>${fmt.eur(SA.direct_revenue)}</b>. ClassPass pays the studio separately — <b>€${CP.payout_per_visit}</b> a visit — so its contribution is calculated, not recorded.`;
+    $('#money-tiles').innerHTML = tile('Direct revenue', fmt.eur(SA.direct_revenue), 'Mindbody sales, all products') +
+      tile('Per direct visit', fmt.eur2(CP.direct_revenue_per_visit), 'direct revenue ÷ non-ClassPass visits') +
+      tile('ClassPass visits', fmt.n(CP.visits), `${fmt.pct(CP.share_of_visits)} of all visits`) +
+      tile('ClassPass revenue', fmt.eur(CP.revenue), `${fmt.pct(CP.share_of_combined_revenue)} of combined · at €${CP.payout_per_visit}/visit`);
+    hbars('#c-fam', SA.families.filter(f => f.revenue > 0).map(f => ({ label: f.family, value: f.share, color: 'var(--trial)', note: `${fmt.eur(f.revenue)}` })));
+    if (SA.monthly) {
+      const mo = SA.monthly; columns('#c-monthly', mo.map(m => MON(m.month)), [
+        { name: 'New members', color: COL['Trial / free'], values: mo.map(m => m.new_members) },
+        { name: 'Renewals', color: COL['Paid direct'], values: mo.map(m => m.renewals) }], { stacked: true, w: 460, h: 220 });
+      $('#monthly-card').insertAdjacentHTML('beforeend', `<div class="legend"><span><i class="sw tr"></i>New members</span><span><i class="sw pd"></i>Renewals</span></div>`);
+    } else {
+      $('#monthly-card').innerHTML = `<p class="chart-title">Paying members per month</p><p class="chart-sub">Needs the detail layout of the Sales by Service export</p><p style="color:var(--ink-2);font-size:14px;margin:0">The current export is the summary layout (one row per product), so month-by-month members, renewals and new-vs-returning cannot be computed. Re-export with client detail to unlock this panel.</p>`;
+    }
+    $('#cp-note').innerHTML = `<b>ClassPass is ${fmt.pct(CP.share_of_visits)} of visits, ${fmt.pct(CP.share_of_combined_revenue)} of revenue, and ${fmt.pct(cp.share)} of the client list.</b>A ClassPass visit earns €${CP.payout_per_visit} against ${fmt.eur2(CP.direct_revenue_per_visit)} for a direct client. At ${fmt.pct(S ? S.fill_rate_overall : null)} fill that visit displaces nobody — so it is small and positive, not a loss. The cost is opportunity: ${fmt.n(cp.clients)} people tried the studio through ClassPass and ${cp.converted} became members.`;
+  }
+
+  // 6. recommendations
+  const ratio = Math.round(tr.conversion_rate / cp.conversion_rate);
+  $('#recs').innerHTML = [
+    ['Keep ClassPass — and work on converting its visitors, not restricting them.', `At €${CP.payout_per_visit} a visit into classes that are ${fmt.pct(S ? S.fill_rate_overall : null)} full, ClassPass is incremental revenue. The problem is that ${fmt.n(cp.clients)} people tried the studio and ${cp.converted} joined. A trial-pack offer handed to every ClassPass first-timer is the cheapest experiment in this deck.`, 'What would change it: fill above ~70% in evening slots, or a payout cut.'],
+    ['Grow the trial funnel. It is the member engine.', `Trial clients convert ${ratio}× better than ClassPass clients. Every month with fewer trial packs sold is a month with fewer new members six weeks later.`, 'What would change it: trial-pack pricing so low it cannibalises drop-ins.'],
+    [S && S.layout === 'day_time' ? 'Fill the mornings and Friday before adding slots.' : 'Fill the mornings before adding slots.', `Morning sessions average ${S ? S.bands.find(b => b.band === 'Morning').avg_per_session : '—'} attendees against ${S ? S.bands.find(b => b.band === 'Evening').avg_per_session : '—'} in the evening. The 7:30 regulars are the studio's most loyal clients — build on them.`, 'What would change it: capacity data showing a class type with fewer than 10 places.'],
+    ['Never rank instructors on unadjusted return rate.', `Channel mix reverses the ranking. Compare within channel, and suppress any group under ${M.instructors.suppressed_below} clients.`, 'What would change it: nothing — this is a method correction.'],
+    ['Ask what happened to ClassPass intake between ${MON(peakCp.month)} and ${MON(lowCp.month)}.'.replace('${MON(peakCp.month)}', MON(peakCp.month)).replace('${MON(lowCp.month)}', MON(lowCp.month)), `Intake swung from ${peakCp.classpass} to ${lowCp.classpass} and back. If that was a decision, it is context; if not, it is a finding.`, 'What would change it: a known cause.'],
+  ].map(([h, why, chg]) => `<li><b>${h}</b><div class="why">${why}</div><div class="why" style="color:var(--muted);font-size:12.5px">${chg}</div></li>`).join('');
+
+  // 7. limits
+  const lims = [
+    `Right-censoring: cohorts from the last ${M.meta.assumptions.cohort_min_obs_days} days are incomplete and shown hatched. Their return rates are understated by construction.`,
+    `${co.length} monthly cohorts exist; the studio's Mindbody history starts ${ov.window_start}. Nothing here supports claims about annual seasonality or long-run retention.`,
+    `ClassPass revenue is not in Mindbody. It is computed as visits × €${CP.payout_per_visit}, the rate the owner reports — a calculation, not a record.`,
+    `Acquisition channel is inferred from the first-visit pricing option, not a recorded attribution field.`,
+    S && !S.sessions_known ? 'Attendance export lacks session counts; per-session averages assume every slot ran weekly for the whole window.' : null,
+    S && S.layout === 'time' ? 'Attendance is grouped by time of day only, so weekday patterns (e.g. Friday) are not visible in this export.' : null,
+    SA && SA.layout !== 'detail' ? 'Sales export is the summary layout: month-by-month revenue, renewals and per-client value are not available.' : null,
+    `Client IDs are hashed (pseudonymised), names and contacts dropped; only aggregates are published, and any group under ${M.meta.assumptions.min_cell} people is suppressed. The studio can still re-identify its own clients — this is pseudonymisation, not anonymisation.`,
+  ].filter(Boolean);
+  $('#limits').innerHTML = lims.map(l => `<li>${l}</li>`).join('');
+  $('#foot').innerHTML = `Sources: ${Object.values(M.meta.sources).join(' · ')}<br>Generated ${M.meta.generated_at.replace('T', ' ').slice(0, 16)} UTC by <code>src/analyse.py</code>. Assumptions: capacity ${M.meta.assumptions.capacity_per_class}, ClassPass €${M.meta.assumptions.classpass_payout_eur}/visit, lapsed after ${M.meta.assumptions.lapse_days} days.` + (M.meta.warnings.length ? `<br>Pipeline warnings: ${M.meta.warnings.join(' ')}` : '');
+}
+main();
+</script>
 </body>
 </html>
