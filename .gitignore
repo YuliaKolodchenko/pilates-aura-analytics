@@ -179,3 +179,16 @@ cython_debug/
 #  refer to https://docs.cursor.com/context/ignore-files
 .cursorignore
 .cursorindexingignore
+# ---------------------------------------------------------------
+# Pilates Aura: client data never leaves this machine.
+# Raw Mindbody exports contain real names, phones and emails.
+# ---------------------------------------------------------------
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+*.xlsx
+*.xls
+
+# macOS
+.DS_Store
